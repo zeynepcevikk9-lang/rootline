@@ -23,7 +23,7 @@ app = FastAPI(
 
 @app.get("/", response_class=FileResponse)
 def index() -> Path:
-    return Path(__file__).parent / "web" / "index.html"
+    return Path(__file__).parent / "static" / "index.html"
 
 
 @app.get("/api/health")
