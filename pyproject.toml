@@ -1,0 +1,17 @@
+[project]
+name = "rootline"
+version = "0.1.0"
+description = "A privacy-first infrastructure operations agent"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+rootline = "rootline.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
