@@ -10,7 +10,7 @@
 
 ## Phase 1 — first useful workflow
 
-- Kubernetes read connector.
+- Kubernetes read connector. (started)
 - Git/Gitea read connector.
 - Argo CD read connector.
 - Prometheus read connector.

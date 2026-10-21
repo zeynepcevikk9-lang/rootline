@@ -38,6 +38,11 @@ Connectors expose typed capabilities instead of arbitrary shell commands. Each c
 - approval requirement
 - verification procedure
 
+The first real connector is a read-only Kubernetes API connector. It uses the
+Kubernetes API directly, does not require a daemon on every node, and accepts a
+small client interface so authentication and transport can be tested separately
+from the workflow planner.
+
 Example capabilities:
 
 - `kubernetes.get_pods`
