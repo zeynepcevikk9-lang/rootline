@@ -16,6 +16,7 @@
 - Prometheus read connector.
 - Evidence-backed incident investigation.
 - CLI interface.
+- Web planning interface. (started)
 
 ## Phase 2 — operational memory
 

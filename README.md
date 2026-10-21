@@ -41,6 +41,17 @@ rootline plan "investigate the production api incident after the last deploy"
 
 The demo is intentionally read-only. It prints the typed capabilities Rootline would use; real connectors will be added incrementally.
 
+## Web UI
+
+Install the web extras and start the local planning interface:
+
+```bash
+python -m pip install -e ".[web]"
+uvicorn rootline.web:app --reload
+```
+
+Open `http://127.0.0.1:8000`. The first web slice turns a natural-language request into a read-only typed operation plan.
+
 ## License
 
 TBD

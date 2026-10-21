@@ -1,0 +1,2 @@
+[console_scripts]
+rootline = rootline.cli:main

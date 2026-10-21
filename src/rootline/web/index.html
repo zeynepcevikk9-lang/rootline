@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rootline — Infrastructure Operations Agent</title>
+    <style>
+      :root { color-scheme: dark; --bg: #0b1020; --panel: #131b31; --muted: #8d9ab8; --line: #273452; --accent: #7c9cff; --good: #65d6a0; --warn: #f3c969; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; font: 15px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; color: #edf2ff; background: radial-gradient(circle at 80% 0%, #1b2851, var(--bg) 42%); }
+      header { display: flex; align-items: center; justify-content: space-between; padding: 22px 6vw; border-bottom: 1px solid var(--line); }
+      .brand { display: flex; gap: 12px; align-items: center; font-weight: 750; letter-spacing: .02em; }
+      .mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: linear-gradient(135deg, #8ea9ff, #5a6ee1); color: #0b1020; font-weight: 900; }
+      .status { color: var(--good); font-size: 13px; }
+      main { width: min(1120px, 88vw); margin: 54px auto; }
+      .hero { max-width: 760px; margin-bottom: 32px; }
+      h1 { margin: 0 0 12px; font-size: clamp(32px, 5vw, 56px); line-height: 1.05; }
+      h2 { margin-top: 0; font-size: 18px; }
+      p { color: var(--muted); }
+      .grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; }
+      .panel { background: color-mix(in srgb, var(--panel) 92%, transparent); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: 0 20px 60px #0003; }
+      textarea { width: 100%; min-height: 145px; resize: vertical; color: #eef3ff; background: #0c1326; border: 1px solid var(--line); border-radius: 10px; padding: 14px; font: inherit; outline: none; }
+      textarea:focus { border-color: var(--accent); }
+      button { border: 0; border-radius: 9px; padding: 11px 16px; margin-top: 14px; color: #081020; background: var(--accent); font-weight: 750; cursor: pointer; }
+      button:disabled { opacity: .55; cursor: wait; }
+      .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .example { margin: 0; padding: 7px 10px; color: #b9c7e9; background: #1b2744; font-size: 12px; font-weight: 500; }
+      .result { min-height: 300px; }
+      .empty { color: var(--muted); }
+      .step { padding: 12px 0; border-bottom: 1px solid var(--line); }
+      .step:last-child { border-bottom: 0; }
+      .step strong { display: block; color: #fff; }
+      .meta { display: flex; gap: 8px; margin-top: 5px; color: var(--muted); font-size: 12px; }
+      .pill { border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; }
+      .warning { margin-top: 14px; padding: 10px; border-left: 3px solid var(--warn); color: #f7df99; background: #3a3018; }
+      @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } header { padding: 18px 6vw; } main { margin-top: 34px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><div class="mark">R</div><span>Rootline</span></div>
+      <div class="status">● read-only planning mode</div>
+    </header>
+    <main>
+      <section class="hero">
+        <h1>Tell Rootline what happened.</h1>
+        <p>Rootline turns an operational intent into an evidence-first, typed plan across your infrastructure tools. This first slice is intentionally read-only.</p>
+      </section>
+      <section class="grid">
+        <div class="panel">
+          <h2>Ask Rootline</h2>
+          <textarea id="intent" placeholder="e.g. Investigate the production API incident after the last deploy"></textarea>
+          <button id="plan">Build investigation plan</button>
+          <div class="examples">
+            <button class="example" data-intent="Investigate the production API incident after the last deploy">API incident</button>
+            <button class="example" data-intent="Check whether our production TLS certificate is expiring">TLS expiry</button>
+            <button class="example" data-intent="Check backup restore readiness for production">Backup readiness</button>
+            <button class="example" data-intent="Find safe candidates for disk cleanup">Disk pressure</button>
+          </div>
+        </div>
+        <div class="panel result" id="result"><h2>Plan</h2><p class="empty">Your plan will appear here.</p></div>
+      </section>
+    </main>
+    <script>
+      const intent = document.querySelector('#intent');
+      const result = document.querySelector('#result');
+      const button = document.querySelector('#plan');
+      document.querySelectorAll('.example').forEach((item) => item.addEventListener('click', () => { intent.value = item.dataset.intent; intent.focus(); }));
+      button.addEventListener('click', async () => {
+        if (!intent.value.trim()) return;
+        button.disabled = true;
+        result.innerHTML = '<h2>Plan</h2><p class="empty">Selecting typed capabilities…</p>';
+        try {
+          const response = await fetch('/api/plan', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({intent: intent.value}) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || 'Planning failed');
+          result.innerHTML = `<h2>Plan</h2><p>${data.summary}</p>${data.steps.map((step, i) => `<div class="step"><strong>${i + 1}. ${step.capability}</strong><span>${step.description}</span><div class="meta"><span class="pill">${step.kind}</span><span class="pill">risk: ${step.risk}</span></div></div>`).join('')}${data.warnings.map(w => `<div class="warning">${w}</div>`).join('')}`;
+        } catch (error) { result.innerHTML = `<h2>Plan</h2><div class="warning">${error.message}</div>`; }
+        finally { button.disabled = false; }
+      });
+    </script>
+  </body>
+</html>
