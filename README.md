@@ -30,7 +30,16 @@ The first product principles are:
 
 ## Status
 
-Early design and architecture phase.
+Early development. The first vertical slice includes a deterministic intent planner, typed capabilities and a mock connector.
+
+## Local demo
+
+```bash
+python -m pip install -e .
+rootline plan "investigate the production api incident after the last deploy"
+```
+
+The demo is intentionally read-only. It prints the typed capabilities Rootline would use; real connectors will be added incrementally.
 
 ## License
 

@@ -2,7 +2,7 @@
 
 from collections.abc import Iterable
 
-from .contracts import Capability
+from .contracts import Capability, ToolHandler, ToolResult
 
 
 class DuplicateCapabilityError(ValueError):
@@ -12,6 +12,7 @@ class DuplicateCapabilityError(ValueError):
 class ToolRegistry:
     def __init__(self, capabilities: Iterable[Capability] = ()) -> None:
         self._capabilities: dict[str, Capability] = {}
+        self._handlers: dict[str, ToolHandler] = {}
         for capability in capabilities:
             self.register(capability)
 
@@ -19,6 +20,10 @@ class ToolRegistry:
         if capability.name in self._capabilities:
             raise DuplicateCapabilityError(capability.name)
         self._capabilities[capability.name] = capability
+
+    def register_handler(self, name: str, handler: ToolHandler) -> None:
+        self.get(name)
+        self._handlers[name] = handler
 
     def get(self, name: str) -> Capability:
         try:
@@ -28,4 +33,10 @@ class ToolRegistry:
 
     def list(self) -> tuple[Capability, ...]:
         return tuple(self._capabilities.values())
+
+    def execute(self, name: str, params: dict[str, object] | None = None) -> ToolResult:
+        handler = self._handlers.get(name)
+        if handler is None:
+            raise KeyError(f"No handler registered for capability: {name}")
+        return handler(params or {})
 
